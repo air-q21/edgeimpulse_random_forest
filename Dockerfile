@@ -11,3 +11,4 @@ COPY train.py .
 
 # Wajib menggunakan ENTRYPOINT dengan flag -u
 ENTRYPOINT ["python", "-u", "train.py"]
+
