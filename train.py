@@ -4,7 +4,7 @@ import sys
 import joblib
 import numpy as np
 
-print("=== STARTING TRAIN.PY ===", flush=True)
+print("=== CONTAINER ONLINE & PYTHON RUNNING ===", flush=True)
 
 try:
     parser = argparse.ArgumentParser()
@@ -13,20 +13,15 @@ try:
     parser.add_argument('--n_estimators', type=int, default=25)
     parser.add_argument('--max_depth', type=int, default=8)
     
-    # parse_known_args wajib agar argumen bawaan Edge Impulse tidak memicu crash
     args, _ = parser.parse_known_args()
 
-    print(f"Data directory: {args.data_directory}", flush=True)
-    print(f"Output directory: {args.out_directory}", flush=True)
+    print(f"Reading data from: {args.data_directory}", flush=True)
 
     X_path = os.path.join(args.data_directory, 'X_split_train.npy')
     Y_path = os.path.join(args.data_directory, 'Y_split_train.npy')
 
-    # Konversi ke float32 untuk menghemat RAM
     X_train = np.load(X_path).astype(np.float32)
     Y_train = np.load(Y_path)
-
-    print(f"X_train shape: {X_train.shape}", flush=True)
 
     if len(X_train.shape) > 2:
         X_train = X_train.reshape(X_train.shape[0], -1)
@@ -41,7 +36,7 @@ try:
         n_jobs=1
     )
     
-    print("Melatih model Random Forest...", flush=True)
+    print("Training Random Forest Classifier...", flush=True)
     clf.fit(X_train, y_labels)
 
     os.makedirs(args.out_directory, exist_ok=True)
@@ -51,6 +46,6 @@ try:
     print("=== MODEL SAVED SUCCESSFULLY ===", flush=True)
 
 except Exception as e:
-    print(f"ERROR: {str(e)}", flush=True)
+    print(f"PYTHON ERROR: {str(e)}", flush=True)
     sys.exit(1)
     
