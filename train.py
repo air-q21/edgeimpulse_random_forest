@@ -6,64 +6,54 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
 def main():
-    # 1. Parsing argumen CLI & parameter dari Edge Impulse
-    parser = argparse.ArgumentParser(description='Train Random Forest Classifier for Edge Impulse')
-    parser.add_argument('--data-directory', type=str, required=True, help='Path direktori data input')
-    parser.add_argument('--out-directory', type=str, required=True, help='Path direktori output model')
-    parser.add_argument('--n_estimators', type=int, default=100, help='Jumlah pohon dalam Random Forest')
-    parser.add_argument('--max_depth', type=int, default=10, help='Kedalaman maksimum pohon')
-    
-    # parse_known_args penting agar argumen bawaan Edge Impulse (--info-file, --epochs, dll) tidak bikin error
+    parser = argparse.ArgumentParser(description='Train RAM-Optimized Random Forest')
+    parser.add_argument('--data-directory', type=str, required=True)
+    parser.add_argument('--out-directory', type=str, required=True)
+    parser.add_argument('--n_estimators', type=int, default=25)  # Diturunkan dari 100 ke 25 agar hemat RAM
+    parser.add_argument('--max_depth', type=int, default=8)       # Batasi kedalaman pohon
     args, _ = parser.parse_known_args()
 
-    print(f"--> Memulai proses pelatihan dengan n_estimators={args.n_estimators}, max_depth={args.max_depth}")
+    print(f"--> Konfigurasi: n_estimators={args.n_estimators}, max_depth={args.max_depth}", flush=True)
 
-    # 2. Lokasi file dataset
     x_train_path = os.path.join(args.data_directory, 'X_split_train.npy')
     y_train_path = os.path.join(args.data_directory, 'Y_split_train.npy')
 
     if not os.path.exists(x_train_path) or not os.path.exists(y_train_path):
-        print(f"ERROR: File dataset tidak ditemukan di {args.data_directory}")
+        print(f"ERROR: Dataset tidak ditemukan di {args.data_directory}", flush=True)
         sys.exit(1)
 
-    # 3. Memuat data NumPy
-    X_train = np.load(x_train_path)
+    # 1. Konversi data ke float32 untuk memotong penggunaan memori hingga 50%
+    X_train = np.load(x_train_path).astype(np.float32)
     Y_train = np.load(y_train_path)
 
-    print(f"--> Shape X_train awal: {X_train.shape}")
-    print(f"--> Shape Y_train awal: {Y_train.shape}")
-
-    # Flatten X_train jika fitur berbentuk multidimensi (misal dari Spectral Analysis / Image)
     if len(X_train.shape) > 2:
         X_train = X_train.reshape(X_train.shape[0], -1)
-        print(f"--> Reshaped X_train menjadi: {X_train.shape}")
 
-    # 4. Mengambil label_index dari kolom pertama Y_train
     if Y_train.ndim > 1:
         y_labels = Y_train[:, 0].astype(int)
     else:
         y_labels = Y_train.astype(int)
 
-    print(f"--> Total sampel: {X_train.shape[0]}, Total fitur per sampel: {X_train.shape[1]}")
+    print(f"--> Total sampel: {X_train.shape[0]}, Jumlah Fitur: {X_train.shape[1]}", flush=True)
 
-    # 5. Pelatihan Model Random Forest
+    # 2. Gunakan n_jobs=1 agar Docker tidak membuat kloning memori multi-process
     clf = RandomForestClassifier(
         n_estimators=args.n_estimators,
         max_depth=args.max_depth,
+        max_features='sqrt',
         random_state=42,
-        n_jobs=-1
+        n_jobs=1
     )
 
-    print("--> Melatih Random Forest Classifier...")
+    print("--> Memulai pelatihan Random Forest...", flush=True)
     clf.fit(X_train, y_labels)
-    print("--> Pelatihan selesai dengan sukses!")
+    print("--> Pelatihan selesai!", flush=True)
 
-    # 6. Menyimpan file model.pkl ke folder output wajib
+    # 3. Simpan artefak model.pkl
     os.makedirs(args.out_directory, exist_ok=True)
-    model_output_path = os.path.join(args.out_directory, 'model.pkl')
-    
-    joblib.dump(clf, model_output_path)
-    print(f"--> Artefak model berhasil disimpan di: {model_output_path}")
+    model_path = os.path.join(args.out_directory, 'model.pkl')
+    joblib.dump(clf, model_path)
+    print(f"--> Model berhasil disimpan di: {model_path}", flush=True)
 
 if __name__ == '__main__':
     main()
