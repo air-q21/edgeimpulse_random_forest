@@ -4,16 +4,16 @@
   "parameters": [
     {
       "name": "Number of trees",
-      "value": 100,
+      "value": 25,
       "type": "int",
       "help": "Jumlah pohon keputusan dalam Random Forest (n_estimators)",
       "param": "n_estimators"
     },
     {
       "name": "Max depth",
-      "value": 10,
+      "value": 8,
       "type": "int",
-      "help": "Batas kedalaman maksimum setiap pohon",
+      "help": "Batas kedalaman maksimum setiap pohon (max_depth)",
       "param": "max_depth"
     }
   ]
