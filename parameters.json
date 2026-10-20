@@ -3,17 +3,17 @@
   "type": "machine-learning",
   "parameters": [
     {
-      "name": "Number of trees",
+      "name": "Jumlah Trees",
       "value": 25,
       "type": "int",
-      "help": "Jumlah pohon keputusan dalam Random Forest (n_estimators)",
+      "help": "Jumlah estimator/pohon dalam Random Forest",
       "param": "n_estimators"
     },
     {
-      "name": "Max depth",
+      "name": "Kedalaman Maksimal",
       "value": 8,
       "type": "int",
-      "help": "Batas kedalaman maksimum setiap pohon (max_depth)",
+      "help": "Kedalaman maksimum setiap pohon",
       "param": "max_depth"
     }
   ]
