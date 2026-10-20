@@ -13,6 +13,7 @@ try:
     parser.add_argument('--n_estimators', type=int, default=25)
     parser.add_argument('--max_depth', type=int, default=8)
     
+    # parse_known_args mencegah crash akibat argumen bawaan Edge Impulse
     args, _ = parser.parse_known_args()
 
     print(f"Reading data from: {args.data_directory}", flush=True)
@@ -20,8 +21,11 @@ try:
     X_path = os.path.join(args.data_directory, 'X_split_train.npy')
     Y_path = os.path.join(args.data_directory, 'Y_split_train.npy')
 
+    # Konversi float32 untuk efisiensi memori RAM
     X_train = np.load(X_path).astype(np.float32)
     Y_train = np.load(Y_path)
+
+    print(f"X_train shape: {X_train.shape}", flush=True)
 
     if len(X_train.shape) > 2:
         X_train = X_train.reshape(X_train.shape[0], -1)
@@ -48,4 +52,3 @@ try:
 except Exception as e:
     print(f"PYTHON ERROR: {str(e)}", flush=True)
     sys.exit(1)
-    
